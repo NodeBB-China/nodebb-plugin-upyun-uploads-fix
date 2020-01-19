@@ -1,41 +1,85 @@
 'use strict'
-// 系统函数库
-// const user = module.parent.parent.require('./user')
-// const db = module.parent.parent.require('../src/database')
-// const meta = module.parent.parent.require('./meta')
-// const utils = module.parent.parent.require('../public/src/utils')
 
-// 常用模块
-// const async = module.parent.parent.require('async')
-// const nconf = module.parent.parent.require('nconf')
-// const winston = module.parent.parent.require('winston')
-// const path = module.parent.parent.require('path')
+const db = require.main.require('./src/database')
+const winston = require.main.require('winston')
 
-// 载入依赖模块
-// const _ = require('lodash')
-// const callbackify = require('../callbackify')
+const nconf = require.main.require('nconf')
+const Package = require('../package.json')
 
-class Controllers {
-  async renderAdminPage (req, res, next) {
-    /*
-      请确保你的路由地址能和模板路径能够对应。
-      例如， 如果你的站点地址为:
-        myforum.com/some/complex/route/
-      你的模板地址应该为:
-        templates/some/complex/route.tpl
-      并且你应该这样来渲染它:
-        res.render('some/complex/route');
-    */
-
-    res.render('admin/plugins/quickstart', {})
-    /*
-      使用回调方式中的 next(err, data) 方法。
-      传递数据:
-        return '数据'
-      传递错误:
-        throw new Error('错误')
-    */
+function makeError (err) {
+  if (err instanceof Error) {
+    err.message = Package.name + ' :: ' + err.message
+  } else {
+    err = new Error(Package.name + ' :: ' + err)
   }
+
+  winston.error(err.message)
+  return err
+}
+
+const Controllers = {}
+const settings = {
+  'operaterName': process.env.UPYUN_OPERATER_NAME,
+  'operaterPassword': process.env.UPYUN_OPERATER_PASSWORD,
+  'endpoint': process.env.UPYUN_ENDPOINT || 'v0.api.upyun.com',
+  'bucket': process.env.UPYUN_UPLOADS_BUCKET,
+  'path': process.env.UPYUN_UPLOADS_PATH,
+  'host': process.env.UPYUN_HOST
+}
+Controllers.renderAdmin = (req, res) => {
+  // Regenerate csrf token
+  var token = req.csrfToken()
+  var forumPath = nconf.get('url')
+  if (forumPath.split('').reverse()[0] !== '/') {
+    forumPath = forumPath + '/'
+  }
+  console.log()
+  var data = {
+    bucket: settings.bucket,
+    path: settings.path,
+    host: settings.host,
+    forumPath: forumPath,
+    endpoint: settings.endpoint || 'v0.api.upyun.com',
+    operaterName: settings.operaterName,
+    operaterPassword: settings.operaterPassword,
+    csrf: token
+  }
+
+  res.render('admin/plugins/upyun-uploads', data)
+}
+Controllers.saveSettings = (settings, res, next) => {
+  db.setObject(Package.name, settings, function (err) {
+    if (err) {
+      return next(makeError(err))
+    }
+
+    // fetchSettings()
+    next()
+  })
+}
+
+Controllers.upyunSettings = (req, res, next) => {
+  const data = req.body
+  const newSettings = {
+    bucket: data.bucket || '',
+    host: data.host || '',
+    path: data.path || '',
+    endpoint: data.endpoint || 'v0.api.upyun.com'
+  }
+
+  Controllers.saveSettings(newSettings, res, next)
+}
+
+Controllers.credentials = (req, res, next) => {
+  const data = req.body
+  const newSettings = {
+    operaterName: data.operaterName || '',
+    operaterPassword: data.operaterPassword || ''
+  }
+
+  Controllers.saveSettings(newSettings, res, next)
 }
 
 module.exports = Controllers
+module.exports.Controllers = Controllers
+module.exports.settings = settings

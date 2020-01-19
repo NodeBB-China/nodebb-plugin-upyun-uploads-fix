@@ -1,17 +1,17 @@
 {
-  "name": "nodebb-plugin-quickstart",
-  "version": "0.2.4",
-  "description": "NodeBB插件的快速生成工具",
+  "name": "nodebb-plugin-upyun-uploads-fix",
+  "version": "2.0.0",
+  "description": "使 NodeBB 通过 UPYUN 上传图片，附件。",
   "main": "library.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/nodebb-china/nodebb-plugin-quickstart"
+    "url": "https://github.com/nodebb-china/nodebb-plugin-upyun-uploads-fix"
   },
   "keywords": [
     "nodebb",
     "plugin",
-    "quickstart",
-    "shell"
+    "upyun",
+    "uploads"
   ],
   "husky": {
     "hooks": {
@@ -31,7 +31,7 @@
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/nodebb-china/nodebb-plugin-quickstart/issues"
+    "url": "https://github.com/nodebb-china/nodebb-plugin-upyun-uploads-fix/issues"
   },
   "readmeFilename": "README.md",
   "nbbpm": {
@@ -51,5 +51,9 @@
     "lint-staged": "^8.2.0"
   },
   "dependencies": {
+    "axios": "^0.19.0",
+    "mime": "^2.4.4",
+    "upyun": "^3.3.11",
+    "uuid": "^3.3.3"
   }
 }
