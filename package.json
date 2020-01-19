@@ -1,6 +1,6 @@
 {
   "name": "nodebb-plugin-upyun-uploads-fix",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "使 NodeBB 通过 UPYUN 上传图片，附件。",
   "main": "library.js",
   "repository": {
