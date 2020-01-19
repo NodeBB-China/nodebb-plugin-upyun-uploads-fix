@@ -25,7 +25,7 @@ const axios = require('axios')
 const { settings } = require('./controllers')
 const { Controllers } = require('./controllers')
 
-console.log(settings)
+// console.log(settings)
 
 let upyunConn = null
 
@@ -43,7 +43,7 @@ function makeError (err) {
 const Core = {}
 Core.UpyunConn = () => {
   if (!upyunConn) {
-    console.log(settings)
+    // console.log(settings)
     const bucket = new Upyun.Bucket(settings.bucket, settings.operaterName, settings.operaterPassword)
     upyunConn = new Upyun.Client(bucket, { domain: settings.endpoint })
   }
@@ -223,11 +223,11 @@ Core.uploadFile = async (data) => {
     throw new Error('invalid file path')
   }
   // check filesize vs. settings
-  const allowedMimeTypes = meta.config.allowedFileExtensions.split(',').map(v => mime.getType(v))
+  // const allowedMimeTypes = meta.config.allowedFileExtensions.split(',').map(v => mime.getType(v))
 
-  if (allowedMimeTypes.indexOf(mime.getType(file.path)) === -1) {
-    throw new Error('invalid mime type')
-  }
+  // if (allowedMimeTypes.indexOf(mime.getType(file.path)) === -1) {
+  //  throw new Error('invalid mime type')
+  // }
 
   if (file.size > parseInt(meta.config.maximumFileSize, 10) * 1024) {
     winston.error('error:file-too-big, ' + meta.config.maximumFileSize)

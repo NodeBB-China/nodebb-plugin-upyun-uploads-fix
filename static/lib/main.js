@@ -15,6 +15,6 @@ $(document).ready(function () {
 		Ajax 请求完成后触发，更明确的表述： Ajax操作完成， 并切换路由后触发。
 	*/
 
-	console.log('nodebb-plugin-quickstart: 已载入');
+	// console.log('nodebb-plugin-quickstart: 已载入');
 	// 注意：这个会在着陆页触发。
 });
