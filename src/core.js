@@ -223,18 +223,18 @@ Core.uploadFile = async (data) => {
     throw new Error('invalid file path')
   }
   // check filesize vs. settings
-  // const allowedMimeTypes = meta.config.allowedFileExtensions.split(',').map(v => mime.getType(v))
-
-  // if (allowedMimeTypes.indexOf(mime.getType(file.path)) === -1) {
-  //  throw new Error('invalid mime type')
-  // }
+  const allowedMimeTypes = meta.config.allowedFileExtensions.split(',').map(v => mime.getType(v))
+  winston.verbose(allowedMimeTypes)
+  if (allowedMimeTypes.indexOf(mime.getType(file.path)) === -1) {
+   throw new Error('invalid mime type')
+  }
 
   if (file.size > parseInt(meta.config.maximumFileSize, 10) * 1024) {
     winston.error('error:file-too-big, ' + meta.config.maximumFileSize)
     throw new Error('[[error:file-too-big, ' + meta.config.maximumFileSize + ']]')
   }
 
-  const buffer = util.promisify(fs.readFile(file.path))
+  const buffer = util.promisify(fs.readFile)(file.path)
   return Core.uploadToUpyun(file.name, buffer)
 }
 module.exports = Core
