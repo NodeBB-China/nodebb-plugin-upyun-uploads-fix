@@ -19,7 +19,6 @@ const mime = require('mime')
 const uuid = require('uuid/v4')
 const fs = require('fs')
 const path = require('path')
-const util = require('util')
 const axios = require('axios')
 
 const { settings } = require('./controllers')
@@ -65,11 +64,11 @@ Core.getUpyunDir = () => {
 }
 
 Core.getUpyunHost = () => {
-  var host = 'https://' + settings.bucket + '.b0.upaiyun.com'
+  var host = 'http://' + settings.bucket + '.b0.upaiyun.com'
   if (settings.host) {
     // must start with http://
     if (!settings.host.match(/^http/)) {
-      host = 'https://' + settings.host
+      host = 'http://' + settings.host
     } else {
       host = settings.host
     }
@@ -77,12 +76,12 @@ Core.getUpyunHost = () => {
   return host
 }
 
-Core.uploadToUpyun = async (filename, buffer) => {
+Core.uploadToUpyun = async (filename, stream) => {
   let remotePath = Core.getUpyunDir() + '/'
   remotePath += uuid() + path.extname(filename)
   try {
-    const data = await Core.UpyunConn().putFile(remotePath, buffer)
-    winston.verbose(data)
+    const result = await Core.UpyunConn().putFile(remotePath, stream)
+    winston.verbose(result)
     const host = Core.getUpyunHost()
     const remoteHref = host + remotePath
     return {
@@ -194,8 +193,8 @@ Core.uploadImage = async (data) => {
       throw new Error('invalid mime type')
     }
 
-    const buffer = await util.promisify(fs.readFile)(image.path)
-    return Core.uploadToUpyun(image.name, buffer)
+    const stream = fs.createReadStream(image.path)
+    return Core.uploadToUpyun(image.name, stream)
   } else { // River: what is Core about? need test.
     if (allowedMimeTypes.indexOf(mime.getType(image.url)) === -1) {
       throw new Error('invalid mime type')
@@ -226,7 +225,7 @@ Core.uploadFile = async (data) => {
   const allowedMimeTypes = meta.config.allowedFileExtensions.split(',').map(v => mime.getType(v))
   winston.verbose(allowedMimeTypes)
   if (allowedMimeTypes.indexOf(mime.getType(file.path)) === -1) {
-   throw new Error('invalid mime type')
+    throw new Error('invalid mime type')
   }
 
   if (file.size > parseInt(meta.config.maximumFileSize, 10) * 1024) {
@@ -234,8 +233,8 @@ Core.uploadFile = async (data) => {
     throw new Error('[[error:file-too-big, ' + meta.config.maximumFileSize + ']]')
   }
 
-  const buffer = util.promisify(fs.readFile)(file.path)
-  return Core.uploadToUpyun(file.name, buffer)
+  const stream = fs.createReadStream(file.path)
+  return Core.uploadToUpyun(file.name, stream)
 }
 module.exports = Core
 module.exports.Core = Core
